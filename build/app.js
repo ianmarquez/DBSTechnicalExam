@@ -45,6 +45,18 @@ const createRectangle = (upperLeft, lowerRight) => {
         handleError(err.message);
     }
 };
+const fill = (x, y, character) => {
+    try {
+        if (!currentCanvas)
+            throw new Error('Canvas is not yet existing!');
+        currentCanvas.fill(x, y, character);
+        currentCanvas.printCanvas();
+    }
+    catch (err) {
+        console.log(err);
+        handleError(err.message);
+    }
+};
 const isInputValid = (params, numberOfParams) => {
     for (let i = 0; i < numberOfParams; i++) {
         if (isNaN(parseInt(params[i]))) {
@@ -96,6 +108,13 @@ const getUserInput = () => {
                 }
                 getUserInput();
                 break;
+            case 'b':
+                if (isInputValid(params.slice(1), 2)) {
+                    fill(parseInt(params[1]), parseInt(params[2]), params[3]);
+                }
+                getUserInput();
+                break;
+            case 'r':
             default:
                 console.log(safe_1.default.red('Invalid command! \n'));
                 rl.question('enter command: ', questionHandler);

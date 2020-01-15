@@ -84,33 +84,48 @@ export default class Canvas {
     }
 
     public fill(x: number, y: number, color: string) : void {
-        let rowsToBeProcessed: number[] = [y];
-        while (rowsToBeProcessed.length !== 0) {
-            const currentRow = rowsToBeProcessed[0];
-            if (this.rows[currentRow]) {
-                let itemsToBeProcessed : Item[] = [this.rows[currentRow].items[x]];
-                while(itemsToBeProcessed.length !== 0) {
-                    const item = itemsToBeProcessed[0];
-                    if (item && item.content !== 'x' && item.content === ' ') {
-                        item.content = color;
-                        const currentItemIndex = item.index;
-                        if (currentItemIndex - 1 >= 0 && 
-                            this.rows[currentRow].items[currentItemIndex - 1].content !== 'x' &&
-                            this.rows[currentRow].items[currentItemIndex - 1].content === ' ') {
-                            itemsToBeProcessed.push(this.rows[currentRow].items[currentItemIndex - 1]);
-                        }
-                        if (currentItemIndex + 1 < this.rows[currentRow].items.length && 
-                            this.rows[currentRow].items[currentItemIndex + 1].content !== 'x') {
-                            itemsToBeProcessed.push(this.rows[currentRow].items[currentItemIndex + 1]);
-                        }
-                        rowsToBeProcessed.push(currentRow - 1);
-                        rowsToBeProcessed.push(currentRow + 1);        
-                    } 
-                    itemsToBeProcessed.shift();
-                }
+        const SYM_IN_TARGET = this.rows[y].items[x].content;
+        const isItemOutofBounds = (index: number) : boolean => {
+            return !(0 <= index && index <= this.rows[0].items.length);
+        }
+
+        const isRowOutofBounds = (index: number) : boolean => {
+            return !(0 < index && index <= Object.keys(this.rows).length);
+        }
+
+        const changeColors = (rowIndex: number, item: Item): void => {
+            if (item.content === SYM_IN_TARGET) {
+                item.content = color;
             }
-            rowsToBeProcessed.shift();
-        }        
+
+            const topRowIndex = rowIndex - 1;
+            const bottomRowIndex = rowIndex + 1
+            const top = !isRowOutofBounds(topRowIndex) && this.rows[topRowIndex] ? this.rows[topRowIndex].items[item.index] : null;
+            const bottom = !isRowOutofBounds(bottomRowIndex) && this.rows[bottomRowIndex] ? this.rows[bottomRowIndex].items[item.index] : null;
+            const left = !isItemOutofBounds(item.index - 1) && this.rows[rowIndex] ? this.rows[rowIndex].items[item.index - 1] : null;
+            const right = !isItemOutofBounds(item.index + 1) && this.rows[rowIndex] ? this.rows[rowIndex].items[item.index + 1] : null;
+
+            if(top && top.content === SYM_IN_TARGET) {
+                changeColors(topRowIndex, top);
+            }
+
+            if (bottom && bottom.content === SYM_IN_TARGET) {
+                changeColors(bottomRowIndex, bottom);
+            }
+
+            if (left && left.content === SYM_IN_TARGET) {
+                changeColors(rowIndex, left);
+            }
+
+            if (right && right.content === SYM_IN_TARGET) {
+                changeColors(rowIndex, right);
+            }
+        };
+
+        const seedItem = this.rows[y].items[x];
+        if(color !== SYM_IN_TARGET) {
+            changeColors(y, seedItem)
+        }
     }
 
 }
